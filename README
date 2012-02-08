@@ -1,0 +1,45 @@
+gson-interface
+
+This project allows a class to define its own Gson serialization and
+deserialization by implementing a simple interface. It also solves the
+common problem of wanting to leverage Gson's default serialization while
+adding a special field. In order for it to work, it must be registered with
+the Gson instance:
+
+Gson gson = new GsonBuilder()
+        .registerTypeAdapterFactory(new InterfaceAdapterFactory())
+        .create();
+
+Any class that wishes to serialize itself must implement
+JsonSerialization<THIS_CLASS>, implementing the
+
+public JsonElement toJsonTree(GsonContext context)
+
+method. In the implementation of that method, a user can call
+context.toJsonTree(obj) and even context.thisToJsonTree(this). Note that
+calling context.toJsonTree(this) will result in infinite recursion; that is
+the point of using the context.thisToJsonTree(this) method
+
+Any class that wishes to have custom deserialization must implement
+JsonDeserialization<DESERIALIZER>, where DESERIALIZER implements
+JsonDeserializes<CLASS_TO_DESERIALIZE>. The deserializer has to have a
+default constructor and it has to implement the 
+
+CLASS_TO_DESERIALIZE fromJson(JsonElement json, GsonContext context)
+
+method. In the implementation of that method, a user can call
+context.fromJsonTree(json, objClass), context.thisFromJsonTree(json), or
+even context.thisFromJsonTree(json, subclassOfCLASS_TO_DESERIALIZE). As with
+toJsonTree, calling context.fromJsonTree(json, CLASS_TO_DESERIALIZE.class)
+will result in infinite recursion; use context.thisFromJsonTree(json)
+instead.
+
+This code has been (lightly) tested against gson-2.1. Some details of
+InterfaceAdapterFactory depend on parts of the API that are likely to
+change.
+
+This project came largely from a discussion on the google-gson issue
+tracker: http://code.google.com/p/google-gson/issues/detail?id=400
+
+The example classes (Drink and MixedDrink) came from a related disussion:
+http://code.google.com/p/google-gson/issues/detail?id=43

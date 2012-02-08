@@ -46,8 +46,8 @@ public class InterfaceExample {
         }
 
         @Override
-        public JsonElement toJsonTree(GsonContext<Drink> gson) {
-            JsonObject object = gson.thisToJsonTree(this).getAsJsonObject();
+        public JsonElement toJsonTree(GsonContext<Drink> context) {
+            JsonObject object = context.thisToJsonTree(this).getAsJsonObject();
             object.add("virgin", new JsonPrimitive(true));
             return object;
         }
@@ -68,19 +68,19 @@ public class InterfaceExample {
         }
 
         @Override
-        public JsonElement toJsonTree(GsonContext<Drink> gson) {
-            return gson.thisToJsonTree(this);
+        public JsonElement toJsonTree(GsonContext<Drink> context) {
+            return context.thisToJsonTree(this);
         }
     }
 
     static class DrinkDeserializer implements JsonDeserializes<Drink> {
         @Override
-        public Drink fromJsonTree(JsonElement json, Type type, GsonContext<Drink> gson) {
+        public Drink fromJsonTree(JsonElement json, Type type, GsonContext<Drink> context) {
             JsonObject object = json.getAsJsonObject();
             if (object.has("alcohol")) {
-                return gson.thisFromJsonTree(json, MixedDrink.class);
+                return context.thisFromJsonTree(json, MixedDrink.class);
             } else {
-                return gson.thisFromJsonTree(json);
+                return context.thisFromJsonTree(json);
             }
         }
     }

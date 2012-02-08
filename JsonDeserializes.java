@@ -34,5 +34,5 @@ import java.lang.reflect.Type;
  * @author mintern
  */
 public interface JsonDeserializes<T> {
-    T fromJsonTree (JsonElement json, Type type, GsonContext<T> gson);
+    T fromJsonTree (JsonElement json, Type type, GsonContext<T> context);
 }

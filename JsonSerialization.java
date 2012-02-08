@@ -34,5 +34,5 @@ import com.google.gson.JsonElement;
  * @author mintern
  */
 public interface JsonSerialization<T> {
-    public JsonElement toJsonTree(GsonContext<T> gson);
+    public JsonElement toJsonTree(GsonContext<T> context);
 }
