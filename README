@@ -10,6 +10,8 @@ Gson gson = new GsonBuilder()
         .registerTypeAdapterFactory(new InterfaceAdapterFactory())
         .create();
 
+Check out InterfaceExample.java for an illustrative example of usage.
+
 Any class that wishes to serialize itself must implement
 JsonSerialization<THIS_CLASS>, implementing the
 
