@@ -1,4 +1,9 @@
 /**
+ * This is included here for convenience. It has its own github at
+ * https://github.com/BMintern/Java-Reflection
+ */
+
+/**
  * Copyright (c) 2012, Brandon Mintern, EasyESI, Berkeley, CA
  * All rights reserved.
  * 
