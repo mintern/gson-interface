@@ -80,7 +80,9 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
                 TypeToken<T> tt,
                 TypeAdapterFactory factory) {
             selfSerializing = serializes;
-            dsc.setAccessible(true);
+            if (dsc != null) {
+                dsc.setAccessible(true);
+            }
             deserializerConstructor = dsc;
             gson = g;
             typeToken = tt;
