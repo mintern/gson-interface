@@ -27,16 +27,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-import com.google.gson.*;
-import com.google.gson.internal.GsonInternalAccess;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.TypeAdapter;
 import com.google.gson.internal.bind.JsonTreeReader;
 import com.google.gson.internal.bind.JsonTreeWriter;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
