@@ -35,6 +35,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +61,9 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
     public static class InterfaceTypeAdapter<T> extends TypeAdapter<T> {
         // This map ensures that only one deserializer of each type exists.
         private static final Map<Class, JsonDeserializes<?>> deserializerInstances = new HashMap();
+        // We have to manually build a TypeToken from its constructor
+        // because the constructor is not public-accessible.
+        private static final Constructor<TypeToken> ttConstructor = Reflection.getConstructor(TypeToken.class, Type.class);
 
         // Fields set in the constructor
         private final boolean selfSerializing;
@@ -68,7 +72,10 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
         private final TypeToken<T> typeToken;
         private final TypeAdapterFactory thisFactory;
 
-        // Lazily-initialized fields. Call their corresponding functions in
+        // Adapters taht follow this one in the chain for the indicated type
+        private final Map<Type, TypeAdapter> nextAdapters = new HashMap();
+
+        // Lazily-initialized fields. Call their corresponding getters in
         // order to access them.
         private TypeAdapter<T> delegate;
         private GsonContext gsonContext;
@@ -92,7 +99,7 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
         @Override
         public void write(JsonWriter writer, T value) throws IOException {
             if (!selfSerializing) {
-                delegate().write(writer, value);
+                getDelegate().write(writer, value);
             } else if (value == null) {
                 writer.nullValue();
             } else {
@@ -104,7 +111,7 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
         @Override
         public T read(JsonReader reader) throws IOException {
             if (deserializerConstructor == null) {
-                return delegate().read(reader);
+                return getDelegate().read(reader);
             }
             JsonElement json = Streams.parse(reader);
             if (json.isJsonNull()) {
@@ -113,7 +120,7 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
             return deserializer().fromJsonTree(json, typeToken.getType(), gsonContext());
         }
 
-        private synchronized TypeAdapter<T> delegate() {
+        synchronized TypeAdapter<T> getDelegate() {
             if (delegate == null) {
                 delegate = GsonInternalAccess.INSTANCE.getNextAdapter(gson, thisFactory, typeToken);
             }
@@ -122,9 +129,19 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
 
         private synchronized GsonContext gsonContext() {
             if (gsonContext == null) {
-                gsonContext = new GsonContext(gson, delegate(), thisFactory);
+                gsonContext = new GsonContext(gson, this);
             }
             return gsonContext;
+        }
+
+        synchronized <C extends T> TypeAdapter<C> getNextAdapter(Type type) {
+            TypeAdapter<C> nextAdapter = nextAdapters.get(type);
+            if (nextAdapter == null) {
+                TypeToken tt = Reflection.constructAnyway(ttConstructor, type);
+                nextAdapter = GsonInternalAccess.INSTANCE.getNextAdapter(gson, thisFactory, tt);
+                nextAdapters.put(type, nextAdapter);
+            }
+            return nextAdapter;
         }
 
         private JsonDeserializes<T> deserializer() {

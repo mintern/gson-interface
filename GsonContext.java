@@ -43,15 +43,12 @@ import java.util.Map;
  * @author mintern
  */
 public class GsonContext<T> {
-    private final Map<Type, TypeAdapter> nextAdapters = new HashMap();
     private final Gson gson;
-    private final TypeAdapter<T> delegateAdapter;
-    private final TypeAdapterFactory thisFactory;
+    private final InterfaceAdapterFactory.InterfaceTypeAdapter<T> constructingAdapter;
 
-    public GsonContext(Gson g, TypeAdapter<T> delegate, TypeAdapterFactory factory) {
+    public GsonContext(Gson g, InterfaceAdapterFactory.InterfaceTypeAdapter<T> ita) {
         gson = g;
-        delegateAdapter = delegate;
-        thisFactory = factory;
+        constructingAdapter = ita;
     }
 
     public JsonElement toJsonTree(Object obj) {
@@ -61,7 +58,7 @@ public class GsonContext<T> {
     public JsonElement thisToJsonTree(T obj) throws JsonIOException {
         JsonTreeWriter writer = new JsonTreeWriter();
         try {
-            delegateAdapter.write(writer, obj);
+            constructingAdapter.getDelegate().write(writer, obj);
         } catch (IOException e) {
             throw new JsonIOException(e);
         }
@@ -78,29 +75,18 @@ public class GsonContext<T> {
 
     public T thisFromJsonTree(JsonElement json) throws JsonIOException {
         try {
-            return delegateAdapter.read(new JsonTreeReader(json));
+            return constructingAdapter.getDelegate().read(new JsonTreeReader(json));
         } catch (IOException e) {
             throw new JsonIOException(e);
         }
     }
 
     public <C extends T> C thisFromJsonTree(JsonElement json, Type typeOfC) {
-        TypeAdapter<C> adapter = nextAdapter(typeOfC);
+        TypeAdapter<C> adapter = constructingAdapter.getNextAdapter(typeOfC);
         try {
             return adapter.read(new JsonTreeReader(json));
         } catch (IOException e) {
             throw new JsonIOException(e);
         }
-    }
-
-    private synchronized <C extends T> TypeAdapter<C> nextAdapter(Type type) {
-        TypeAdapter<C> nextAdapter = nextAdapters.get(type);
-        if (nextAdapter == null) {
-            Constructor<TypeToken> ttConstructor = Reflection.getConstructor(TypeToken.class, Type.class);
-            TypeToken tt = Reflection.constructAnyway(ttConstructor, type);
-            nextAdapter = GsonInternalAccess.INSTANCE.getNextAdapter(gson, thisFactory, tt);
-            nextAdapters.put(type, nextAdapter);
-        }
-        return nextAdapter;
     }
 }
