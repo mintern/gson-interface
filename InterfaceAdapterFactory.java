@@ -72,7 +72,7 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
         private final TypeToken<T> typeToken;
         private final TypeAdapterFactory thisFactory;
 
-        // Adapters taht follow this one in the chain for the indicated type
+        // Adapters that follow this one in the chain for the indicated type
         private final Map<Type, TypeAdapter> nextAdapters = new HashMap();
 
         // Lazily-initialized fields. Call their corresponding getters in
