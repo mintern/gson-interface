@@ -61,9 +61,6 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
     public static class InterfaceTypeAdapter<T> extends TypeAdapter<T> {
         // This map ensures that only one deserializer of each type exists.
         private static final Map<Class, JsonDeserializes<?>> deserializerInstances = new HashMap();
-        // We have to manually build a TypeToken from its constructor
-        // because the constructor is not public-accessible.
-        private static final Constructor<TypeToken> ttConstructor = Reflection.getConstructor(TypeToken.class, Type.class);
 
         // Fields set in the constructor
         private final boolean selfSerializing;
@@ -134,12 +131,12 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
             return gsonContext;
         }
 
-        synchronized <C extends T> TypeAdapter<C> getNextAdapter(Type type) {
-            TypeAdapter<C> nextAdapter = nextAdapters.get(type);
+        synchronized <C extends T> TypeAdapter<C> getNextAdapter(Type typeOfC) {
+            TypeAdapter<C> nextAdapter = nextAdapters.get(typeOfC);
             if (nextAdapter == null) {
-                TypeToken tt = Reflection.constructAnyway(ttConstructor, type);
-                nextAdapter = GsonInternalAccess.INSTANCE.getNextAdapter(gson, thisFactory, tt);
-                nextAdapters.put(type, nextAdapter);
+                nextAdapter = GsonInternalAccess.INSTANCE.getNextAdapter(gson, thisFactory,
+                        (TypeToken<C>) TypeToken.get(typeOfC));
+                nextAdapters.put(typeOfC, nextAdapter);
             }
             return nextAdapter;
         }
