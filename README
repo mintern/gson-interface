@@ -36,9 +36,8 @@ toJsonTree, calling context.fromJsonTree(json, CLASS_TO_DESERIALIZE.class)
 will result in infinite recursion; use context.thisFromJsonTree(json)
 instead.
 
-This code has been (lightly) tested against gson-2.1. Some details of
-InterfaceAdapterFactory depend on parts of the API that are likely to
-change.
+This code has been tested heavily against gson-2.1 and recently updated to
+incorporate changes in gson-2.2.1.
 
 This project came largely from a discussion on the google-gson issue
 tracker: http://code.google.com/p/google-gson/issues/detail?id=400
