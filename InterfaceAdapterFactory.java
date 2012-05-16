@@ -28,7 +28,6 @@
  *
  */
 import com.google.gson.*;
-import com.google.gson.internal.GsonInternalAccess;
 import com.google.gson.internal.Streams;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -119,7 +118,7 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
 
         synchronized TypeAdapter<T> getDelegate() {
             if (delegate == null) {
-                delegate = GsonInternalAccess.INSTANCE.getNextAdapter(gson, thisFactory, typeToken);
+                delegate = gson.getDelegateAdapter(thisFactory, typeToken);
             }
             return delegate;
         }
@@ -134,8 +133,7 @@ public class InterfaceAdapterFactory implements TypeAdapterFactory {
         synchronized <C extends T> TypeAdapter<C> getNextAdapter(Type typeOfC) {
             TypeAdapter<C> nextAdapter = nextAdapters.get(typeOfC);
             if (nextAdapter == null) {
-                nextAdapter = GsonInternalAccess.INSTANCE.getNextAdapter(gson, thisFactory,
-                        (TypeToken<C>) TypeToken.get(typeOfC));
+                nextAdapter = gson.getDelegateAdapter(thisFactory, (TypeToken<C>) TypeToken.get(typeOfC));
                 nextAdapters.put(typeOfC, nextAdapter);
             }
             return nextAdapter;
