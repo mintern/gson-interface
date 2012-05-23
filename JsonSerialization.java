@@ -33,6 +33,6 @@ import com.google.gson.JsonElement;
  *
  * @author mintern
  */
-public interface JsonSerialization<T> {
+public interface JsonSerialization<T extends JsonSerialization<T>> {
     public JsonElement toJsonTree(GsonContext<T> context);
 }
