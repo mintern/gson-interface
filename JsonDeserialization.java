@@ -27,4 +27,4 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-public interface JsonDeserialization<D extends JsonDeserializes<?>> { }
+public interface JsonDeserialization<D extends JsonDeserializes<? extends JsonDeserialization<D>>> { }
